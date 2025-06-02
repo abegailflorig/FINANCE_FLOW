@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Lato", sans-serif;
+    }
+
+    .main-container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding-bottom: -1px;
+      background-color: #66D2CE;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 1px 0 3px;
+      font-size: 22px;
+      font-weight: 700;
+      color: black;
+    }
+
+    .profile-pic-wrapper {
+      text-align: center;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .camera-icon {
+      position: absolute;
+      right: calc(50% - 44px);
+      bottom: 0;
+      border-radius: 50%;
+      padding: 4px;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 4px;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 6rem 6rem 0 0;
+      margin: 25px 0;
+      padding: 106px 25px;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .form-group {
+      margin-bottom: 5px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600px;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #51DE9A;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    .save-button {
+      display: block;
+      width: 120px;
+      margin: -95px auto 0;
+      padding: 10px 0;
+      background-color: #51DE9A ;
+      color: black;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .save-button:hover {
+      background-color: #66D2CE ;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-around;
+      padding: 7px 0;
+      background: #f0fff4;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 400px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 12px 12px 0 0;
+      box-shadow: -1 -3px 5px rgba(0, 0, 0, 0.1);
+      border: 2px solid lightblue;
+    }
+
+    .nav-item img {
+      width: 30px;
+      height: 30px;
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <h1>Edit Profile</h1>
+
+    <div class="profile-pic-wrapper">
+      <img id="profileImage" src="chinley.jpeg" alt="Profile" class="profile-pic" />
+      <input type="file" id="imageUpload" accept="image/*" style="display:none" />
+      <img src="editprofile.png" alt="Camera" class="camera-icon" id="uploadTrigger" style="cursor:pointer;" />
+    </div>
+
+    <div class="form-container">
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input type="text" id="lastName" name="lastName">
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password">
+      </div>
+    </div>
+    
+    <button type="submit" class="save-button">Save</button>
+  </div>
+
+  <div class="navbar">
+    <div class="nav-item"><a href="homepage.html"><img src="home.png" alt="Home" /></a></div>
+    <div class="nav-item"><a href="analysis.html"><img src="analysis.png" alt="Chart" /></a></div>
+    <div class="nav-item"><a href="list.html"><img src="list.png" alt="Scan" /></a></div>
+    <div class="nav-item"><img src="menu.png" alt="Menu" /></div>
+    <div class="nav-item"><a href="profile.html"><img src="profile.png" alt="Profile" /></a></div>
+  </div>
+
+ <script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+  const supabase = createClient(
+    "https://bwpzqbaemdcwwnreafgt.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cHpxYmFlbWRjd3ducmVhZmd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxODAwNTEsImV4cCI6MjA2Mzc1NjA1MX0.TcKFYp5sD9WG8bmu9WmFp4CI-SP7Al1WnDkPVYJYHGc"
+  );
+
+  let userId;
+  let uploadedProfileUrl = null;
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData?.user) {
+      alert("Not logged in.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    userId = authData.user.id;
+    document.getElementById("email").value = authData.user.email;
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("name, profile_url")
+      .eq("user_id", userId)
+      .single();
+
+    if (profile) {
+      document.getElementById("lastName").value = profile.name || "";
+      if (profile.profile_url) {
+        document.getElementById("profileImage").src = profile.profile_url;
+      }
+    }
+
+    // Upload trigger
+    document.getElementById("uploadTrigger").addEventListener("click", () => {
+      document.getElementById("imageUpload").click();
+    });
+
+    // Upload file
+    document.getElementById("imageUpload").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const filePath = `avatars/${userId}-${Date.now()}`;
+      const { data, error: uploadError } = await supabase.storage
+        .from("profile-pictures")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        alert("Image upload failed.");
+        return;
+      }
+
+      const { data: publicURLData } = supabase.storage
+        .from("profile-pictures")
+        .getPublicUrl(filePath);
+
+      uploadedProfileUrl = publicURLData.publicUrl;
+      document.getElementById("profileImage").src = uploadedProfileUrl;
+    });
+
+    // Save profile
+    document.querySelector(".save-button").addEventListener("click", async () => {
+      const fullName = document.getElementById("lastName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!fullName || !email) {
+        alert("Name and email required.");
+        return;
+      }
+
+      // 1. Update user email/password
+      const updates = {};
+      if (email !== authData.user.email) updates.email = email;
+      if (password) updates.password = password;
+
+      if (Object.keys(updates).length > 0) {
+        const { error: updateError } = await supabase.auth.updateUser(updates);
+        if (updateError) {
+          alert("Error updating email/password");
+          return;
+        }
+      }
+
+      // 2. Update profiles table
+      const { error: profileUpdateError } = await supabase
+        .from("profiles")
+        .update({
+          name: fullName,
+          ...(uploadedProfileUrl && { profile_url: uploadedProfileUrl })
+        })
+        .eq("user_id", userId);
+
+      if (profileUpdateError) {
+        alert("Error saving profile info.");
+        return;
+      }
+
+      // 3. Update full_name in users table
+      const { error: usersUpdateError } = await supabase
+        .from("users")
+        .update({ full_name: fullName })
+        .eq("auth_id", userId);
+
+      if (usersUpdateError) {
+        alert("Error updating name in users table.");
+        return;
+      }
+
+      alert("Profile updated!");
+      window.location.href = "profile.html";
+    });
+  });
+</script>
+
+</body>
+</html>
